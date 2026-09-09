@@ -1,0 +1,16 @@
+services:
+  solr:
+    image: solr:10.0.0
+    ports:
+      - "127.0.0.1:8984:8983"
+    volumes:
+      - solr-data:/var/solr
+    command: ["solr-precreate", "libros"]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8983/solr/libros/select?q=*:*&rows=0"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+volumes:
+  solr-data:

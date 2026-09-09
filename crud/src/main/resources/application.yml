@@ -1,0 +1,17 @@
+server:
+  address: 127.0.0.1
+  port: ${PORT:8081}
+spring:
+  application:
+    name: crud-spring-data-solr
+  mvc:
+    problemdetails:
+      enabled: true
+  solr:
+    standalone:
+      host: ${SOLR_URL:http://localhost:8984/solr}
+      default-collection: libros
+    connection-timeout: 10s
+    request-timeout: 30s
+    # Facilita el ejemplo: confirma cada escritura para hacerla visible.
+    commit-mode: immediate

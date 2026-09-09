@@ -1,0 +1,77 @@
+<header class="topbar">
+  <div class="brand"><span class="brand-mark" aria-hidden="true">L</span><span>LIBROS<span class="brand-sub">Catálogo</span></span></div>
+  <span class="top-label">Administración de la colección</span>
+</header>
+<main>
+  <div class="page-heading">
+    <div><p class="eyebrow">TU COLECCIÓN</p><h1>Catálogo de libros</h1></div>
+    <button class="primary" type="button" (click)="nuevo()" [disabled]="ocupado()"><span aria-hidden="true">＋</span> Nuevo libro</button>
+  </div>
+
+  @if (aviso()) {
+    <div class="notice success" role="status"><span>{{ aviso() }}</span><button class="text-button" type="button" aria-label="Cerrar notificación" (click)="aviso.set('')">Cerrar</button></div>
+  }
+  @if (preparando()) { <p role="status" class="notice">Cargando los datos del libro…</p> }
+
+  <section class="catalog" aria-label="Consulta de libros">
+    <form class="searchbar" [formGroup]="busqueda" (ngSubmit)="buscar()">
+      <div class="field search-type"><label for="campo">Buscar por</label><select id="campo" formControlName="campo"><option value="titulo">Título</option><option value="autor">Autor</option></select></div>
+      <div class="field search-input"><label for="busqueda">{{ busqueda.controls.campo.value === 'titulo' ? 'Parte del título' : 'Nombre exacto del autor' }}</label><input id="busqueda" formControlName="valor" type="search" placeholder="Escribe para buscar…" maxlength="300"></div>
+      <button type="submit" class="primary" [disabled]="cargando() || ocupado()">Buscar</button>
+      <button type="button" class="secondary" (click)="limpiar()" [disabled]="cargando() || ocupado()">Limpiar</button>
+    </form>
+    <p class="search-note">La búsqueda distingue mayúsculas y acentos.</p>
+
+    <div class="table-heading"><div><h2>{{ filtro() ? 'Resultados de búsqueda' : 'Todos los libros' }}</h2>@if (datos() && !error()) { <span class="count">{{ datos()!.totalElementos }}</span> }</div><button class="text-button" type="button" (click)="cargar()" [disabled]="cargando() || ocupado()">Actualizar</button></div>
+
+    @if (error()) {
+      <div class="empty-state error-state" role="alert"><h3>No pudimos mostrar los libros</h3><p>{{ error() }}</p><button class="secondary" type="button" (click)="cargar()">Reintentar</button></div>
+    } @else if (cargando()) {
+      <div class="empty-state" role="status"><span class="spinner" aria-hidden="true"></span><p>Cargando catálogo…</p></div>
+    } @else if (datos()?.contenido?.length) {
+      <div class="table-scroll"><table>
+        <caption class="sr-only">Libros del catálogo con acciones para editar y eliminar</caption>
+        <thead><tr><th scope="col">Título</th><th scope="col">Autor</th><th scope="col">Año</th><th scope="col" class="actions-heading">Acciones</th></tr></thead>
+        <tbody>
+          @for (libro of datos()!.contenido; track libro.id) {
+            <tr>
+              <td><strong class="book-title">{{ libro.titulo }}</strong><span class="book-id" [title]="libro.id">ID · {{ libro.id.slice(0, 8) }}</span></td>
+              <td>{{ libro.autor }}</td><td class="year">{{ libro.anio }}</td>
+              <td><div class="row-actions"><button class="text-button" type="button" (click)="editar(libro)" [disabled]="ocupado()" [attr.aria-label]="'Editar ' + libro.titulo">Editar</button><button class="text-button danger-text" type="button" (click)="pedirEliminar(libro)" [disabled]="ocupado()" [attr.aria-label]="'Eliminar ' + libro.titulo">Eliminar</button></div></td>
+            </tr>
+          }
+        </tbody>
+      </table></div>
+    } @else {
+      <div class="empty-state"><span class="empty-symbol" aria-hidden="true">L</span><h3>{{ filtro() ? 'No hay coincidencias' : 'Tu catálogo comienza aquí' }}</h3><p>{{ filtro() ? 'Prueba otra búsqueda o limpia el filtro para ver todos los libros.' : 'Añade el primer libro de tu colección.' }}</p><button class="secondary" type="button" (click)="filtro() ? limpiar() : nuevo()">{{ filtro() ? 'Ver todos los libros' : 'Añadir un libro' }}</button></div>
+    }
+
+    <footer class="pagination">
+      <div class="page-size"><label for="tamanio">Por página</label><select id="tamanio" #tam [value]="tamanio()" (change)="cambiarTamanio(tam.value)" [disabled]="cargando() || ocupado()"><option value="10">10</option><option value="20">20</option><option value="50">50</option><option value="100">100</option></select></div>
+      <span class="range">@if (datos() && !cargando() && !error()) { {{ desde() }}–{{ hasta() }} de {{ datos()!.totalElementos }} }</span>
+      <nav aria-label="Páginas de libros"><button class="secondary" type="button" (click)="cambiarPagina(-1)" [disabled]="pagina() === 0 || cargando() || ocupado() || !!error()">Anterior</button><button class="secondary" type="button" (click)="cambiarPagina(1)" [disabled]="pagina() + 1 >= (datos()?.totalPaginas ?? 0) || cargando() || ocupado() || !!error()">Siguiente</button></nav>
+    </footer>
+  </section>
+</main>
+
+<dialog #editor aria-labelledby="editor-title" (cancel)="cancelarDialogo($event)">
+  <form [formGroup]="formulario" (ngSubmit)="guardar()">
+    <div class="dialog-heading"><div><p class="eyebrow">CATÁLOGO</p><h2 id="editor-title">{{ editando() ? 'Editar libro' : 'Nuevo libro' }}</h2></div><button type="button" class="close-button" (click)="cerrarEditor()" [disabled]="guardando()" aria-label="Cerrar formulario">×</button></div>
+    <div class="dialog-body">
+      <p class="form-intro">Todos los campos son obligatorios.</p>
+      @if (errorFormulario()) { <p class="notice error-message" role="alert">{{ errorFormulario() }}</p> }
+      <fieldset [disabled]="guardando()">
+        <div class="field"><label for="titulo">Título</label><input id="titulo" formControlName="titulo" maxlength="300" autofocus [attr.aria-invalid]="invalido('titulo')" aria-describedby="titulo-error">@if (invalido('titulo')) { <small id="titulo-error" class="validation">Escribe un título de hasta 300 caracteres.</small> }</div>
+        <div class="field"><label for="autor">Autor</label><input id="autor" formControlName="autor" maxlength="200" [attr.aria-invalid]="invalido('autor')" aria-describedby="autor-error">@if (invalido('autor')) { <small id="autor-error" class="validation">Escribe un autor de hasta 200 caracteres.</small> }</div>
+        <div class="field year-field"><label for="anio">Año de publicación</label><input id="anio" type="number" formControlName="anio" min="1" max="9999" step="1" [attr.aria-invalid]="invalido('anio')" aria-describedby="anio-error">@if (invalido('anio')) { <small id="anio-error" class="validation">Escribe un año entero entre 1 y 9999.</small> }</div>
+      </fieldset>
+    </div>
+    <div class="dialog-footer"><button class="secondary" type="button" (click)="cerrarEditor()" [disabled]="guardando()">Cancelar</button><button class="primary" type="submit" [disabled]="guardando()">{{ guardando() ? 'Guardando…' : 'Guardar libro' }}</button></div>
+  </form>
+</dialog>
+
+<dialog #borrado class="delete-dialog" aria-labelledby="delete-title" aria-describedby="delete-description" (cancel)="cancelarDialogo($event)">
+  <div class="dialog-heading"><h2 id="delete-title">¿Eliminar este libro?</h2></div>
+  <div class="dialog-body"><p class="delete-book">{{ porEliminar()?.titulo }}</p><p id="delete-description">Se eliminará del catálogo. Esta acción no se puede deshacer.</p>@if (errorBorrado()) { <p class="notice error-message" role="alert">{{ errorBorrado() }}</p> }</div>
+  <div class="dialog-footer"><button class="secondary" type="button" (click)="cerrarBorrado()" [disabled]="guardando()" autofocus>Cancelar</button><button class="danger" type="button" (click)="eliminar()" [disabled]="guardando()">{{ guardando() ? 'Eliminando…' : 'Eliminar libro' }}</button></div>
+</dialog>
