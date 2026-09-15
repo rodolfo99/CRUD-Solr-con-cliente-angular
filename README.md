@@ -1,8 +1,25 @@
-# CRUD de Libros con Spring Boot, Apache Solr y Angular
+# CRUD de Libros — Spring Boot + Apache Solr + Angular
 
-Proyecto full stack de ejemplo para administrar y buscar libros usando **Spring Boot**, **Apache Solr** y un cliente web desarrollado con **Angular**.
+> Aplicación **full stack en Java** para administrar y buscar libros con **Spring Boot**, **Apache Solr**, **Angular** y **Docker Compose**.
 
-El backend implementa un CRUD REST sobre Solr mediante una reimplementación comunitaria de Spring Data Solr, mientras que el frontend Angular permite gestionar el catálogo desde el navegador.
+![Java](https://img.shields.io/badge/Java-21-informational)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.6-informational)
+![Apache Solr](https://img.shields.io/badge/Apache%20Solr-10.0.0-informational)
+![Angular](https://img.shields.io/badge/Angular-22.1.5-informational)
+![Docker](https://img.shields.io/badge/Docker-Compose-informational)
+
+Este repositorio muestra cómo construir un **CRUD REST con Spring Boot y Apache Solr**, acompañado de un cliente Angular. Además de las operaciones básicas sobre libros, el proyecto sirve como referencia para búsquedas por campos, paginación, persistencia documental e integración de Solr dentro de una arquitectura Java moderna.
+
+## Lo más importante
+
+- Backend REST con Spring Boot y Java 21.
+- Persistencia y búsqueda mediante Apache Solr.
+- Cliente Angular independiente.
+- Crear, consultar, actualizar y eliminar libros.
+- Búsqueda por título y autor.
+- Paginación.
+- Core `libros` creado automáticamente con Docker Compose.
+- Ejemplo práctico de integración entre Java, Solr y Angular.
 
 ## Tecnologías
 
@@ -17,7 +34,19 @@ El backend implementa un CRUD REST sobre Solr mediante una reimplementación com
 - TypeScript 6.0
 - RxJS
 
-## Estructura del repositorio
+## Arquitectura
+
+```text
+Angular
+   │ HTTP / REST
+   ▼
+Spring Boot
+   │ integración Solr
+   ▼
+Apache Solr
+```
+
+## Estructura
 
 ```text
 .
@@ -25,14 +54,13 @@ El backend implementa un CRUD REST sobre Solr mediante una reimplementación com
 └── cliente-angular/  # Frontend Angular
 ```
 
-## Backend
+## Inicio rápido
 
-La API REST administra documentos de libros almacenados en un core de Solr llamado `libros`.
+### 1. Apache Solr
 
-Endpoint principal:
-
-```text
-http://localhost:8081/api/libros
+```bash
+cd crud
+docker compose up -d --wait
 ```
 
 Solr queda disponible en:
@@ -41,30 +69,29 @@ Solr queda disponible en:
 http://localhost:8984/solr/
 ```
 
-### Ejecutar Solr con Docker
+El `compose.yaml` crea automáticamente el core `libros` y conserva los datos en un volumen Docker.
 
-```bash
-cd crud
-docker compose up -d --wait
-```
-
-El `compose.yaml` incluido crea automáticamente el core `libros` y conserva los datos en un volumen Docker.
-
-### Ejecutar Spring Boot
+### 2. Backend Spring Boot
 
 ```bash
 cd crud
 mvn spring-boot:run
 ```
 
-Para generar y ejecutar el JAR:
+API principal:
+
+```text
+http://localhost:8081/api/libros
+```
+
+También puedes generar el JAR:
 
 ```bash
 mvn clean package
 java -jar target/crud-spring-data-solr-1.0.0.jar
 ```
 
-## Cliente Angular
+### 3. Cliente Angular
 
 ```bash
 cd cliente-angular
@@ -72,7 +99,7 @@ npm install
 npm start
 ```
 
-Después abre:
+Abre:
 
 ```text
 http://localhost:4200
@@ -95,12 +122,33 @@ http://localhost:4200
 
 Este proyecto utiliza `solr-spring-boot-starter` de `com.tomaytotomato`, una reimplementación comunitaria del soporte estilo Spring Data para Solr. No corresponde al antiguo módulo oficial archivado `org.springframework.data:spring-data-solr`.
 
-Dentro de `crud/README.md` hay documentación técnica más detallada sobre repositorios, campos Solr, paginación y pruebas con `curl`.
+Dentro de `crud/README.md` hay documentación técnica adicional sobre repositorios, campos Solr, paginación y pruebas con `curl`.
 
-## Objetivo del proyecto
+## Para qué sirve este proyecto
 
-Mostrar cómo construir un **CRUD con Spring Boot, Apache Solr y Angular**, incluyendo búsquedas, persistencia documental, Docker Compose y una interfaz web separada del backend.
+Puede utilizarse como base para estudiar o prototipar:
+
+- **Apache Solr con Spring Boot**.
+- Sistemas de búsqueda de catálogos.
+- Indexación de documentos.
+- APIs REST con búsqueda avanzada.
+- Clientes Angular que consumen servicios Java.
+- Aplicaciones donde la búsqueda sea tan importante como el CRUD.
+
+## Otros proyectos del mismo perfil
+
+- [CRUD PostgreSQL + Angular](https://github.com/rodolfo99/CRUD-PstgreSQL-Libros-con-cliente-angular)
+- [CRUD Neo4j + Angular](https://github.com/rodolfo99/CRUD-LIBROS-NEO4J)
+- [CRUD GraphQL + PostgreSQL + Angular](https://github.com/rodolfo99/crud-GraphQL-con-cliente-angular)
+- [Spring Data GraphDB](https://github.com/rodolfo99/Spring-Data-GraphDB)
+- [Marc2BF — MARC21 a BIBFRAME](https://github.com/rodolfo99/Marc2BF)
+
+## Autor
+
+**Rodolfo Valencia** — desarrollo de software, Java, Spring, Angular, bases de datos, tecnologías semánticas e inteligencia artificial.
+
+GitHub: [@rodolfo99](https://github.com/rodolfo99)
 
 ## Temas relacionados
 
-Spring Boot, Spring Data Solr, Apache Solr, SolrJ, Angular, Java, TypeScript, REST API, CRUD, búsqueda, Docker, Maven, full stack.
+Spring Boot · Spring Data Solr · Apache Solr · SolrJ · Angular · Java · TypeScript · REST API · CRUD · búsqueda · Docker · Maven · full stack
